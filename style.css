@@ -1,70 +1,47 @@
 body {
-    background: #eee;
-    font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
-    font-size: 14px;
-    color: #000;
     margin: 0;
     padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000000; /* Black background */
+    overflow: hidden; /* Hide scrollbars */
+    position: relative; /* For positioning pseudo-elements or dynamically added elements later */
+    color: #fff; /* Default text color for visibility if any text is added */
 }
 
-.swiper-container {
-    width: 80%;
-    max-width: 1000px; /* Max width of the container */
-    padding-top: 50px;
-    padding-bottom: 50px;
-    overflow: hidden; /* Important for coverflow effect */
+/* Basic faint grid using repeating linear gradients */
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        linear-gradient(to right, rgba(50, 50, 50, 0.2) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(50, 50, 50, 0.2) 1px, transparent 1px);
+    background-size: 40px 40px; /* Size of the grid squares */
+    z-index: 1; /* Ensure it's visible but allows interaction with elements behind if any were added */
+    pointer-events: none; /* Make sure it doesn't interfere with mouse events on the body */
 }
 
-.swiper-slide {
-    background-position: center;
-    background-size: cover;
-    width: 200px; /* Default width for non-active slides */
-    height: 200px; /* Default height for non-active slides */
-    background-color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transition: transform 0.5s ease, opacity 0.5s ease, width 0.5s ease, height 0.5s ease; /* Smooth transition for all properties */
-    opacity: 0.6; /* Non-active slides are more transparent */
+/* Glow effect element - to be positioned by JavaScript */
+.glow-effect {
+    position: absolute;
+    width: 240px; /* 6 cells * 40px/cell */
+    height: 240px; /* 6 cells * 40px/cell */
+    border-radius: 50%; /* Circular glow */
+    background-color: rgba(0, 150, 255, 0); /* Start transparent, color will be part of animation */
+    box-shadow: 0 0 0px 0px rgba(0, 150, 255, 0);
+    pointer-events: none; /* Don't interact with mouse */
+    z-index: 2; /* Above the grid, below other potential content */
+    transform: translate(-50%, -50%); /* Center on cursor */
+    transition: background-color 0.3s ease-out, box-shadow 0.3s ease-out, opacity 0.3s ease-out;
+    opacity: 0;
 }
 
-.swiper-slide-active {
-    width: 400px; /* Width for the active slide (2x) */
-    height: 400px; /* Height for the active slide (2x) */
-    opacity: 1; /* Active slide is fully opaque */
-    z-index: 1; /* Ensure active slide is on top */
-    transform: scale(1); /* Explicitly set scale to 1 for active, though width/height change handles size */
-}
-
-/* Adjustments for coverflow effect if used, or for general perspective */
-.swiper-wrapper {
-    align-items: center; /* Vertically align slides in the center of the wrapper */
-}
-
-/* Navigation buttons styling */
-.swiper-button-next,
-.swiper-button-prev {
-    color: #007aff; /* Example color */
-}
-
-/* Pagination styling */
-.swiper-pagination-bullet {
-    background: #007aff;
-}
-
-.swiper-pagination-bullet-active {
-    background: #0056b3;
-}
-
-/* Ensure enough space for larger active slide to not be clipped by container if using certain effects */
-.mySwiper {
-  /* The padding-left and padding-right can be adjusted if slides are clipped */
-  /* padding-left: 60px; */
-  /* padding-right: 60px; */
-}
+/*
+  We will add more specific styles for the highlighted grid lines later,
+  likely by adding/removing classes with JavaScript, or by creating
+  dynamic elements.
+*/
