@@ -1,16 +1,29 @@
+/* General body styling for scrolling */
 body {
     margin: 0;
     padding: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: #000000; /* Black background */
-    overflow: hidden; /* Hide scrollbars */
-    position: relative; /* For positioning pseudo-elements or dynamically added elements later */
-    color: #fff; /* Default text color for visibility if any text is added */
+    font-family: sans-serif;
+    color: #333; /* Default text color for main content */
+    background-color: #f4f4f4; /* Light background for the scrollable page part */
+    /* Ensure there's space for the fixed container if it's on the side */
+    /* This might need adjustment based on fixed-animation-container's final width/position */
+    /* For a left sidebar example: padding-left: 320px; */
 }
 
-/* Basic faint grid using repeating linear gradients */
-body::before {
+#fixed-animation-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 300px; /* Example width, can be adjusted */
+    height: 100vh; /* Takes full viewport height */
+    background-color: #000000; /* Black background for the animation area */
+    overflow: hidden; /* Crucial: Ensures canvas/effects don't spill out */
+    z-index: 100; /* Ensure it's above other content if there's overlap */
+    color: #fff; /* Text color inside the fixed container, if any */
+}
+
+/* Basic faint grid using repeating linear gradients, now applied to the fixed container */
+#fixed-animation-container::before {
     content: "";
     position: absolute;
     top: 0;
@@ -21,27 +34,20 @@ body::before {
         linear-gradient(to right, rgba(50, 50, 50, 0.2) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(50, 50, 50, 0.2) 1px, transparent 1px);
     background-size: 40px 40px; /* Size of the grid squares */
-    z-index: 1; /* Ensure it's visible but allows interaction with elements behind if any were added */
-    pointer-events: none; /* Make sure it doesn't interfere with mouse events on the body */
+    z-index: 1; /* Behind the canvas, but within the container */
+    pointer-events: none;
 }
 
-/* Glow effect element - to be positioned by JavaScript */
-.glow-effect {
-    position: absolute;
-    width: 240px; /* 6 cells * 40px/cell */
-    height: 240px; /* 6 cells * 40px/cell */
-    border-radius: 50%; /* Circular glow */
-    background-color: rgba(0, 150, 255, 0); /* Start transparent, color will be part of animation */
-    box-shadow: 0 0 0px 0px rgba(0, 150, 255, 0);
-    pointer-events: none; /* Don't interact with mouse */
-    z-index: 2; /* Above the grid, below other potential content */
-    transform: translate(-50%, -50%); /* Center on cursor */
-    transition: background-color 0.3s ease-out, box-shadow 0.3s ease-out, opacity 0.3s ease-out;
-    opacity: 0;
+/* Styles for the main scrollable content area */
+.main-content {
+    padding: 20px;
+    /* Adjust margin-left if the fixed container is a left sidebar */
+    margin-left: 300px; /* Matches the width of fixed-animation-container */
+    /* Add more styles as needed for your page layout */
 }
 
 /*
-  We will add more specific styles for the highlighted grid lines later,
-  likely by adding/removing classes with JavaScript, or by creating
-  dynamic elements.
+  The .glow-effect class from the previous version is no longer used,
+  as the glow is now drawn directly onto the canvas in script.js.
+  The canvas itself will be positioned absolutely within fixed-animation-container by script.js.
 */
