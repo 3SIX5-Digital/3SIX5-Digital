@@ -171,13 +171,39 @@
             // Button text will now just fade in, no initDraw needed for it.
 
             // Set initial states
-            // Elements for fade-in/scale-in
-            gsap.set([logoBrandGroup, menuIconBlock, customisableTextGroup, pictureImageShape, pictureSun, buttonText], { autoAlpha: 0, scale: 0.9, transformOrigin: "center center" });
+            // Elements for fade-in/scale-in, or draw-in that should start invisible
+            gsap.set([
+                logoBrandGroup,
+                menuIconBlock,
+                customisableTextGroup,
+                pictureImageShape,
+                pictureSun,
+                buttonText,
+                buttonBase // <--- Added buttonBase here
+            ], { autoAlpha: 0, scale: 0.9, transformOrigin: "center center" });
+
+            // For elements that scale but might not need autoAlpha 0 from the group above (if part of a draw)
+            // We can refine this if needed, but the above set should make buttonBase start invisible.
+            // Scale for buttonBase and buttonText will be handled by their timeline tweens if needed,
+            // or they'll just use scale:1 if not specified. The group set primarily gives them autoAlpha:0.
+            // The buttonBase is drawn, so its scale should be 1. We can override its scale from the group set.
+            gsap.set(buttonBase, { scale: 1 }); // Override scale set by the group if it was included
+
             gsap.set(customisableTextGroup.querySelectorAll('path'), {autoAlpha: 0}); // individual paths in text
 
             // Specifically for pictureBlockOutline, set its fill-opacity to 0 initially
             gsap.set(pictureBlockOutline, { fillOpacity: 0 });
+            // Also ensure pictureBlockOutline starts invisible if it's drawn, then its fill fades.
+            // If its stroke is drawn, the element itself needs to be visible (autoAlpha:1) for the stroke to be seen,
+            // but its content (fill) is hidden by fillOpacity:0.
+            // The initDraw function handles the stroke to look empty.
+            // So, pictureBlockOutline should NOT be in the autoAlpha:0 group above if its stroke is drawn first.
 
+            // Let's refine initial states:
+            // Fade-in elements (start at autoAlpha 0, scale 0.9)
+            gsap.set([logoBrandGroup, menuIconBlock, customisableTextGroup, pictureImageShape, pictureSun, buttonText], { autoAlpha: 0, scale: 0.9, transformOrigin: "center center" });
+            // Drawn elements that should also start invisible until their draw sequence begins
+            gsap.set([buttonBase], {autoAlpha:0}); // Explicitly hide buttonBase initially
 
             const tl = gsap.timeline({
                 scrollTrigger: {
