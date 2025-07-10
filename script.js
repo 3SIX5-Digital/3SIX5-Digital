@@ -1,13 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const animationContainer = document.getElementById('fixed-animation-container');
-    if (!animationContainer) {
-        console.error('Fixed animation container not found!');
+    // The visual container where the canvas and ::before grid live
+    const visualContainer = document.getElementById('fixed-animation-container');
+    // The layer that will actually capture mouse events
+    const interactionLayer = document.getElementById('mouse-interaction-layer');
+
+    if (!visualContainer || !interactionLayer) {
+        console.error('Required container(s) not found! Need fixed-animation-container and mouse-interaction-layer.');
         return;
     }
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    animationContainer.appendChild(canvas);
+    visualContainer.appendChild(canvas); // Canvas is for visuals, appended to visual container
 
     const gridSize = 40; // Must match background-size in CSS
     const highlightCells = 6; // 6x6 area
@@ -17,23 +21,26 @@ document.addEventListener('DOMContentLoaded', () => {
     let mouseY = -10000;
     let lastInteractionTime = 0;
 
-    // Glow properties
+    // Glow properties - User Updated to Purple/Subtle
     const maxGlowRadiusBase = highlightAreaSize * 0.35;
-    const glowColorCore = 'rgba(0, 180, 255, 0.4)';
-    const glowColorMid = 'rgba(0, 150, 255, 0.2)';
-    const glowColorOuter = 'rgba(0, 120, 255, 0)';
+    const glowColorCore = 'rgba(115, 0, 222, 0.2)';
+    const glowColorMid = 'rgba(115, 0, 222, 0.15)';
+    const glowColorOuter = 'rgba(115, 0, 255, 0.05)'; // Slight blue in outer user version
 
-    const lineHighlightColor = 'rgba(120, 180, 255, 0.7)';
+    // Line Highlight Color - User Updated to Purple/Subtle
+    const lineHighlightColor = 'rgba(115, 0, 222, 0.3)';
 
     const FADE_OUT_START_DELAY = 350; // ms of inactivity before fade out begins
     const FADE_OUT_DURATION = 400; // ms for the effect to fade out completely
 
-    let containerRect = animationContainer.getBoundingClientRect();
+    // We get dimensions from visualContainer for canvas drawing,
+    // but mouse events are relative to interactionLayer (which should be identical in size/pos).
+    let visualContainerRect = visualContainer.getBoundingClientRect();
 
     function resizeCanvas() {
-        containerRect = animationContainer.getBoundingClientRect();
-        canvas.width = containerRect.width;
-        canvas.height = containerRect.height;
+        visualContainerRect = visualContainer.getBoundingClientRect(); // Use visual container for canvas size
+        canvas.width = visualContainerRect.width;
+        canvas.height = visualContainerRect.height;
         // Canvas is already absolutely positioned by default within its offset parent if no CSS is applied to it.
         // We ensure it's layered correctly with z-index if needed, but for now, direct append order might be enough.
         // Let's ensure it's explicitly positioned for clarity if issues arise.
@@ -48,21 +55,22 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas(); // Initial size setting
 
-    animationContainer.addEventListener('mousemove', (e) => {
-        // Get mouse position relative to the animationContainer
-        containerRect = animationContainer.getBoundingClientRect(); // Update rect in case of scroll/resize
-        mouseX = e.clientX - containerRect.left;
-        mouseY = e.clientY - containerRect.top;
+    // Event listeners are now on the interactionLayer
+    interactionLayer.addEventListener('mousemove', (e) => {
+        // Mouse coordinates are relative to the viewport, so we still use
+        // visualContainerRect for calculations as it defines the drawing area.
+        // interactionLayer and visualContainer are expected to be perfectly aligned.
+        visualContainerRect = visualContainer.getBoundingClientRect();
+        mouseX = e.clientX - visualContainerRect.left;
+        mouseY = e.clientY - visualContainerRect.top;
         lastInteractionTime = Date.now();
         if (!animationFrameId) {
             animationFrameId = requestAnimationFrame(drawEffect);
         }
     });
 
-    animationContainer.addEventListener('mouseleave', () => {
+    interactionLayer.addEventListener('mouseleave', () => {
         lastInteractionTime = 0; // Triggers fade out
-        // No need to move mouseX/mouseY off-screen as fade is time-based
-        // and mousemove won't be called until mouse re-enters.
     });
 
     function drawEffect() {

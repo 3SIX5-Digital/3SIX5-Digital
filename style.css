@@ -3,23 +3,21 @@ body {
     margin: 0;
     padding: 0;
     font-family: sans-serif;
-    color: #333; /* Default text color for main content */
-    background-color: #f4f4f4; /* Light background for the scrollable page part */
-    /* Ensure there's space for the fixed container if it's on the side */
-    /* This might need adjustment based on fixed-animation-container's final width/position */
-    /* For a left sidebar example: padding-left: 320px; */
+    color: #ffffff; /* Default text color for main content - User updated */
+    background-color: #000000; /* Black background for the page - User updated */
 }
 
 #fixed-animation-container {
     position: fixed;
     top: 0;
     left: 0;
-    width: 300px; /* Example width, can be adjusted */
-    height: 100vh; /* Takes full viewport height */
+    width: 100vw; /* Full viewport width - User updated */
+    height: 100vh; /* Full viewport height */
     background-color: #000000; /* Black background for the animation area */
     overflow: hidden; /* Crucial: Ensures canvas/effects don't spill out */
-    z-index: 100; /* Ensure it's above other content if there's overlap */
-    color: #fff; /* Text color inside the fixed container, if any */
+    z-index: 0; /* Will be behind main content and interaction layer */
+    pointer-events: none; /* Allows clicks/hovers to pass through to content behind/interaction layer */
+    color: #fff; /* Text color inside the fixed container, if any (though unlikely to be used) */
 }
 
 /* Static grid with radial gradient visibility, applied to the fixed container */
@@ -31,26 +29,34 @@ body {
     width: 100%;
     height: 100%;
     background-image:
-        linear-gradient(to right, rgba(80, 80, 80, 0.25) 1px, transparent 1px), /* Slightly more visible base lines */
+        linear-gradient(to right, rgba(80, 80, 80, 0.25) 1px, transparent 1px), /* Base lines */
         linear-gradient(to bottom, rgba(80, 80, 80, 0.25) 1px, transparent 1px);
     background-size: 40px 40px; /* Size of the grid squares */
-    z-index: 1; /* Behind the canvas, but within the container */
-    pointer-events: none;
+    z-index: 1; /* Behind the canvas, but within this container */
+    pointer-events: none; /* Already on parent, but good practice */
     /* Apply a mask to make the grid fade out towards the edges of the container */
     mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
     -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
 }
 
-/* Styles for the main scrollable content area */
-.main-content {
-    padding: 20px;
-    /* Adjust margin-left if the fixed container is a left sidebar */
-    margin-left: 300px; /* Matches the width of fixed-animation-container */
-    /* Add more styles as needed for your page layout */
+/* New layer for catching mouse events */
+#mouse-interaction-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1; /* Above fixed-animation-container, below main-content */
+    background: transparent; /* Must be transparent */
+    /* pointer-events: auto; by default, so it will catch events */
 }
 
-/*
-  The .glow-effect class from the previous version is no longer used,
-  as the glow is now drawn directly onto the canvas in script.js.
-  The canvas itself will be positioned absolutely within fixed-animation-container by script.js.
-*/
+/* Styles for the main scrollable content area */
+.main-content {
+    position: relative; /* Needed for z-index to work */
+    z-index: 2; /* Above mouse-interaction-layer and fixed-animation-container */
+    padding: 20px; /* Example padding */
+    /* background-color: transparent; /* Default, so animation shows through */
+    /* If main content sections need backgrounds, style them individually */
+    /* margin-left is removed as the animation is fullscreen */
+}
