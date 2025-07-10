@@ -22,7 +22,7 @@ body {
     color: #fff; /* Text color inside the fixed container, if any */
 }
 
-/* Basic faint grid using repeating linear gradients, now applied to the fixed container */
+/* Static grid with radial gradient visibility, applied to the fixed container */
 #fixed-animation-container::before {
     content: "";
     position: absolute;
@@ -31,11 +31,14 @@ body {
     width: 100%;
     height: 100%;
     background-image:
-        linear-gradient(to right, rgba(50, 50, 50, 0.2) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(50, 50, 50, 0.2) 1px, transparent 1px);
+        linear-gradient(to right, rgba(80, 80, 80, 0.25) 1px, transparent 1px), /* Slightly more visible base lines */
+        linear-gradient(to bottom, rgba(80, 80, 80, 0.25) 1px, transparent 1px);
     background-size: 40px 40px; /* Size of the grid squares */
     z-index: 1; /* Behind the canvas, but within the container */
     pointer-events: none;
+    /* Apply a mask to make the grid fade out towards the edges of the container */
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
 }
 
 /* Styles for the main scrollable content area */

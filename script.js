@@ -104,21 +104,59 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.fill();
         }
 
-        ctx.strokeStyle = lineHighlightColor.replace(/[\d\.]+\)$/, `${parseFloat(lineHighlightColor.match(/[\d\.]+/g)[3]) * overallOpacity})`);
+        // Gradient highlighted lines
         ctx.lineWidth = 1.5;
+        const baseLineColorRGB = lineHighlightColor.match(/\d+/g).slice(0, 3).join(', '); // Extracts "R, G, B"
+        const baseHighlightOpacity = parseFloat(lineHighlightColor.match(/rgba?\([\d\s,]+\s*\/\s*([\d\.]+)\)/)?.[1] || lineHighlightColor.match(/rgba?\([\d\s,]+,\s*([\d\.]+)\)/)?.[1] || "0.7");
+
+        // Max distance for fade effect calculation, typically half the size of the highlight area.
+        // A larger divisor makes the gradient fall off more slowly (spreads it out).
+        // A smaller divisor makes it fall off more quickly (concentrates it near the cursor).
+        const falloffDivisor = highlightAreaSize / 2.5; // Tunable: controls "spread" of highlight
 
         for (let i = 0; i <= highlightCells; i++) {
-            const x = snappedX + i * gridSize;
-            ctx.beginPath();
-            ctx.moveTo(x, snappedY);
-            ctx.lineTo(x, snappedY + highlightAreaSize);
-            ctx.stroke();
+            // Vertical lines
+            const lineX = snappedX + i * gridSize;
+            // Calculate distance from mouseX to the current vertical line
+            const distToMouseX = Math.abs(lineX - mouseX);
+            // Opacity based on X distance, power curve for sharper falloff near cursor
+            let opacityX = Math.pow(Math.max(0, 1 - distToMouseX / falloffDivisor), 2);
 
-            const y = snappedY + i * gridSize;
-            ctx.beginPath();
-            ctx.moveTo(snappedX, y);
-            ctx.lineTo(snappedX + highlightAreaSize, y);
-            ctx.stroke();
+            // Consider Y influence: if mouse Y is far from the line's segment, reduce opacity
+            const lineCenterY = snappedY + highlightAreaSize / 2;
+            const distToMouseYFromCenter = Math.abs(lineCenterY - mouseY);
+            // Reduce opacity if mouse Y is outside the core highlight area for this line
+            opacityX *= Math.pow(Math.max(0, 1 - distToMouseYFromCenter / (highlightAreaSize/1.5) ), 0.5);
+
+
+            let currentLineOpacity = baseHighlightOpacity * opacityX * overallOpacity;
+            if (currentLineOpacity > 0.015) { // Threshold to avoid drawing nearly invisible lines
+                ctx.strokeStyle = `rgba(${baseLineColorRGB}, ${currentLineOpacity})`;
+                ctx.beginPath();
+                ctx.moveTo(lineX, snappedY);
+                ctx.lineTo(lineX, snappedY + highlightAreaSize);
+                ctx.stroke();
+            }
+
+            // Horizontal lines
+            const lineY = snappedY + i * gridSize;
+            // Calculate distance from mouseY to the current horizontal line
+            const distToMouseY = Math.abs(lineY - mouseY);
+            let opacityY = Math.pow(Math.max(0, 1 - distToMouseY / falloffDivisor), 2);
+
+            // Consider X influence
+            const lineCenterX = snappedX + highlightAreaSize / 2;
+            const distToMouseXFromCenter = Math.abs(lineCenterX - mouseX);
+            opacityY *= Math.pow(Math.max(0, 1 - distToMouseXFromCenter / (highlightAreaSize/1.5) ), 0.5);
+
+            currentLineOpacity = baseHighlightOpacity * opacityY * overallOpacity;
+            if (currentLineOpacity > 0.015) {
+                ctx.strokeStyle = `rgba(${baseLineColorRGB}, ${currentLineOpacity})`;
+                ctx.beginPath();
+                ctx.moveTo(snappedX, lineY);
+                ctx.lineTo(snappedX + highlightAreaSize, lineY);
+                ctx.stroke();
+            }
         }
 
         animationFrameId = requestAnimationFrame(drawEffect);
