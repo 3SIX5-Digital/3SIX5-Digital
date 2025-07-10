@@ -168,70 +168,69 @@
             initDraw(paragraphLine3);
             initDraw(pictureBlockOutline);
             initDraw(buttonBase);
-            // For text, fade-in might be better than draw, but let's try draw for Lets_Build_Text path
-            initDraw(buttonText);
+            // Button text will now just fade in, no initDraw needed for it.
 
-
-            // Set initial states for fade-in elements
-            gsap.set([logoBrandGroup, menuIconBlock, customisableTextGroup, pictureImageShape, pictureSun], { autoAlpha: 0, scale: 0.9, transformOrigin: "center center" });
+            // Set initial states
+            // Elements for fade-in/scale-in
+            gsap.set([logoBrandGroup, menuIconBlock, customisableTextGroup, pictureImageShape, pictureSun, buttonText], { autoAlpha: 0, scale: 0.9, transformOrigin: "center center" });
             gsap.set(customisableTextGroup.querySelectorAll('path'), {autoAlpha: 0}); // individual paths in text
+
+            // Specifically for pictureBlockOutline, set its fill-opacity to 0 initially
+            gsap.set(pictureBlockOutline, { fillOpacity: 0 });
 
 
             const tl = gsap.timeline({
                 scrollTrigger: {
                     trigger: '#animation-section',
                     start: 'top top',
-                    end: `+=${window.innerHeight * 0.75}`, // Animate over 75vh of scroll
-                    scrub: 1, // Smooth scrubbing
-                    pin: true, // Pin the section while animation plays
-                    markers: true, // For development
+                    end: `+=${window.innerHeight * 0.75}`,
+                    scrub: 1,
+                    pin: true,
+                    markers: true,
                 }
             });
 
             // Animation sequence
             tl
                 .to(outsideWireframe, { strokeDashoffset: 0, duration: 2 })
-                .to(navBlock, { strokeDashoffset: 0, duration: 1.5 }, "-=1.5") // Overlap
+                .to(navBlock, { strokeDashoffset: 0, duration: 1.5 }, "-=1.5")
                 .to(dottedLine, { strokeDashoffset: 0, duration: 2, ease: "power1.inOut" }, "-=1.0")
 
                 .to(logoBrandGroup, { autoAlpha: 1, scale: 1, duration: 1 }, "-=1.0")
-                .to(menuIconBlock, { autoAlpha: 1, scale: 1, duration: 0.5 }, "<0.2") // "<0.2" means 0.2s after previous animation starts
+                .to(menuIconBlock, { autoAlpha: 1, scale: 1, duration: 0.5 }, "<0.2")
 
-                .to(customisableTextGroup, { autoAlpha: 1, scale: 1, duration: 0.1 }) // Make group visible
+                .to(customisableTextGroup, { autoAlpha: 1, scale: 1, duration: 0.1 })
                 .to(customisableTextGroup.querySelectorAll('path'), { autoAlpha: 1, stagger: 0.1, duration: 0.5 }, "<")
-
 
                 .to(paragraphLine1, { strokeDashoffset: 0, duration: 1 }, "-=0.5")
                 .to(paragraphLine2, { strokeDashoffset: 0, duration: 1 }, "-=0.8")
                 .to(paragraphLine3, { strokeDashoffset: 0, duration: 1 }, "-=0.8")
 
+                // Picture Block animation
                 .to(pictureBlockOutline, { strokeDashoffset: 0, duration: 1.5 }, "-=0.5")
-                .to(pictureImageShape, { autoAlpha: 1, scale: 1, duration: 1 }, "<0.5") // after outline starts drawing
+                .to(pictureBlockOutline, { fillOpacity: 1, duration: 0.7 }, "<0.8") // Fade in fill after stroke starts drawing
+                .to(pictureImageShape, { autoAlpha: 1, scale: 1, duration: 1 }, "<0.2") // Slightly after fill starts
                 .to(pictureSun, { autoAlpha: 1, scale: 1, duration: 0.7 }, "<0.3")
 
-                .to(buttonBase, { strokeDashoffset: 0, duration: 1 }, "-=0.5")
-                .to(buttonText, { strokeDashoffset: 0, autoAlpha: 1, duration: 1}, "<0.3"); // Draw and fade in text
+                // Button animation
+                .to(buttonBase, { strokeDashoffset: 0, duration: 1 }, "-=0.5") // Draws the button border
+                .to(buttonText, { autoAlpha: 1, scale: 1, duration: 0.7 }, "<0.3"); // Text fades in
 
-            // To make SVG elements initially invisible for the draw/fade effect if not handled by GSAP set
-            // This can be done in CSS as well, but for JS control:
-            gsap.set([
-                outsideWireframe, navBlock, dottedLine, paragraphLine1, paragraphLine2, paragraphLine3,
-                pictureBlockOutline, buttonBase, buttonText
-            ], { autoAlpha: 1 }); // Ensure they are visible to allow stroke animation to be seen
-
-            // For elements that only fade/scale, ensure their autoAlpha is 0 initially
-            // This was done above with gsap.set already.
-
-            // Ensure elements that are part of draw animation are visible (opacity 1)
-            // but their "drawn" part is 0.
-            // The initDraw function sets strokeDashoffset = length, making them "undrawn".
-            // We just need to make sure their opacity is 1.
-            // The elements themselves (not just their strokes)
-            let drawnElements = [outsideWireframe, navBlock, dottedLine, paragraphLine1, paragraphLine2, paragraphLine3, pictureBlockOutline, buttonBase, buttonText];
-            drawnElements.forEach(el => {
-                if(el) gsap.set(el, {autoAlpha: 1});
+            // Ensure drawn elements are visible for stroke animation
+            // autoAlpha is used by GSAP to control opacity and visibility.
+            // For elements that are drawn, their stroke is animated, but the element itself should be visible.
+            // For elements that only fade/scale, their autoAlpha is animated from 0.
+            // The initial gsap.set calls handle the starting autoAlpha states.
+            // We need to ensure that elements being 'drawn' are not set to autoAlpha 0 by a broad selector.
+            let elementsToDraw = [outsideWireframe, navBlock, dottedLine, paragraphLine1, paragraphLine2, paragraphLine3, pictureBlockOutline, buttonBase];
+            elementsToDraw.forEach(el => {
+                if (el) {
+                    // If it was part of the general autoAlpha:0 set, override for draw elements
+                    if (el !== logoBrandGroup && el !== menuIconBlock && el !== customisableTextGroup && el !== pictureImageShape && el !== pictureSun && el !== buttonText) {
+                         gsap.set(el, {autoAlpha: 1}); // Make sure it's visible for drawing
+                    }
+                }
             });
-
         });
     </script>
 
