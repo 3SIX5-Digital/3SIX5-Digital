@@ -213,11 +213,14 @@
                 .to(pictureSun, { autoAlpha: 1, scale: 1, duration: 0.7 }, "<0.3")
 
                 // Button animation
-                .to(buttonBase, { strokeDashoffset: 0, duration: 1 }, "-=0.5") // Draws the button border
-                .to(buttonText, { autoAlpha: 1, scale: 1, duration: 0.7 }, "<0.3"); // Text fades in
+                // Ensure buttonBase is visible for its stroke animation
+                .set(buttonBase, { autoAlpha: 1 }, "-=0.2") // Ensure it's visible slightly before its animation starts
+                .to(buttonBase, { strokeDashoffset: 0, duration: 1.2 }, "<") // Draws the button border, ensure it starts when set
+                .to(buttonText, { autoAlpha: 1, scale: 1, duration: 0.7 }, "<0.5"); // Text fades in, 0.5s after button border starts
 
-            // Ensure drawn elements are visible for stroke animation
-            // autoAlpha is used by GSAP to control opacity and visibility.
+            // Ensure drawn elements are visible for stroke animation.
+            // The gsap.set for buttonBase above is a specific fix.
+            // General logic for other drawn elements:
             // For elements that are drawn, their stroke is animated, but the element itself should be visible.
             // For elements that only fade/scale, their autoAlpha is animated from 0.
             // The initial gsap.set calls handle the starting autoAlpha states.
